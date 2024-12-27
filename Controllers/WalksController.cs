@@ -43,5 +43,49 @@ namespace FirstWebAPI.Controllers
 
             return Ok(walkDto);
         }
+
+
+        [HttpGet]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id){
+            var walkDomain = await walkRepository.GetByIdAsync(id);
+            if(walkDomain == null){
+                return NotFound();
+            }
+            
+            var walkDto = mapper.Map<WalkDto>(walkDomain);
+
+            return Ok(walkDto);
+        }
+
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> Update([FromRoute] Guid id,UpdateWalkRequestDto updateWalkRequestDto){
+
+            var walkDomain = mapper.Map<Walk>(updateWalkRequestDto);
+
+            if(walkDomain == null){
+                return NotFound();
+            }
+
+            var walkDto = mapper.Map<WalkDto>(walkDomain);
+
+            return Ok(walkDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id){
+
+            var deleteWalkDomain = await walkRepository.DeleteAsync(id);
+
+            if(deleteWalkDomain == null){
+                return NotFound();
+            }
+
+            var walkDto = mapper.Map<WalkDto>(deleteWalkDomain);
+
+            return Ok(walkDto);
+        }
     }
 }

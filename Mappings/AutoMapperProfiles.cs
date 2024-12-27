@@ -14,6 +14,7 @@ namespace FirstWebAPI.Mappings
             CreateMap<AddWalksRequestDto,Walk>().ReverseMap();
             CreateMap<Walk,WalkDto>().ReverseMap();
             CreateMap<Difficulty,DifficultyDto>().ReverseMap();
+            CreateMap<UpdateWalkRequestDto,Walk>().ReverseMap();
         }
     }
 }
