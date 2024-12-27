@@ -1,4 +1,5 @@
 using FirstWebAPI.Data;
+using FirstWebAPI.Mappings;
 using FirstWebAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ builder.Services.AddDbContext<WalksDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IRegionRepository,SQLRegionRepository>();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 // Add services to the container.
 builder.Services.AddControllers();

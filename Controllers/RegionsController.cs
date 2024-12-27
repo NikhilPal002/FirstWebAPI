@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net.Http.Headers;
+using AutoMapper;
 using FirstWebAPI.Data;
 using FirstWebAPI.Models.Domain;
 using FirstWebAPI.Models.DTO;
@@ -15,11 +16,13 @@ namespace FirstWebAPI.Controllers
     {
         private readonly WalksDbContext context;
         private readonly IRegionRepository regionRepository;
+        private readonly IMapper mapper;
 
-        public RegionsController(WalksDbContext context, IRegionRepository regionRepository)
+        public RegionsController(WalksDbContext context, IRegionRepository regionRepository,IMapper mapper)
         {
             this.context = context;
             this.regionRepository = regionRepository;
+            this.mapper = mapper;
         }
 
         [HttpGet]
@@ -28,18 +31,8 @@ namespace FirstWebAPI.Controllers
             // Get data from database - domain model
             var regionsDomain = await regionRepository.GetAllAsync();
 
-            // Map domain model to DTOs
-            var regionsDto = new List<RegionDto>();
-            foreach (var region in regionsDomain)
-            {
-                regionsDto.Add(new RegionDto()
-                {
-                    Id = region.Id,
-                    Code = region.Code,
-                    Name = region.Name,
-                    RegionImageUrl = region.RegionImageUrl
-                });
-            }
+            // Map domain model to dto
+            var regionsDto = mapper.Map<List<RegionDto>>(regionsDomain);
 
             // Return DTOs
             return Ok(regionsDto);
@@ -57,13 +50,7 @@ namespace FirstWebAPI.Controllers
                 return NotFound();
             }
 
-            var regionDto = new RegionDto
-            {
-                Id = regionsDomain.Id,
-                Code = regionsDomain.Code,
-                Name = regionsDomain.Name,
-                RegionImageUrl = regionsDomain.RegionImageUrl
-            };
+           var regionDto = mapper.Map<RegionDto>(regionsDomain);
 
             return Ok(regionDto);
         }
@@ -72,23 +59,13 @@ namespace FirstWebAPI.Controllers
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto){
 
             // Map DTO to domain model
-            var regionDomainModel = new Region{
-                Code = addRegionRequestDto.Code,
-                Name = addRegionRequestDto.Name,
-                RegionImageUrl = addRegionRequestDto.RegionImageUrl
-            };
+            var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
 
             // Use Domain model to create region 
             regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
-            await context.SaveChangesAsync();
 
             // Map domain model back to dto
-            var regionDto = new RegionDto{
-                Id = regionDomainModel.Id,
-                Code = regionDomainModel.Code,
-                Name = regionDomainModel.Name,
-                RegionImageUrl = regionDomainModel.RegionImageUrl
-            };
+            var regionDto = mapper.Map<RegionDto>(regionDomainModel);
 
             return CreatedAtAction(nameof(GetById), new {id = regionDto.Id}, regionDto );   
         }
@@ -98,11 +75,7 @@ namespace FirstWebAPI.Controllers
         public async Task<IActionResult> Update([FromRoute] Guid id,[FromBody]  UpdateRegionRequestDto updateRegionRequestDto){
 
             // Map DTO to domain model
-            var regionsDomain = new Region{
-                Code = updateRegionRequestDto.Code,
-                Name = updateRegionRequestDto.Name,
-                RegionImageUrl = updateRegionRequestDto.RegionImageUrl
-            };
+            var regionsDomain = mapper.Map<Region>(updateRegionRequestDto);
             
             regionsDomain = await regionRepository.UpdateAsync(id,regionsDomain);
             if (regionsDomain == null)
@@ -111,12 +84,7 @@ namespace FirstWebAPI.Controllers
             } 
 
             // Convert Domain model to DTO
-            var regionDto = new RegionDto{
-                Id = regionsDomain.Id,
-                Code = regionsDomain.Code,
-                Name = regionsDomain.Name,
-                RegionImageUrl = regionsDomain.RegionImageUrl
-            };
+            var regionDto = mapper.Map<RegionDto>(regionsDomain);
 
             return Ok(regionDto);
         }
@@ -125,18 +93,13 @@ namespace FirstWebAPI.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id){
 
-            var region = await regionRepository.DeleteAsync(id);
+            var regionDomain = await regionRepository.DeleteAsync(id);
 
-            if(region == null){
+            if(regionDomain == null){
                 return NotFound();
             }
 
-            var regionDto = new RegionDto{
-                Id = region.Id,
-                Code = region.Code,
-                Name = region.Name,
-                RegionImageUrl = region.RegionImageUrl
-            };
+            var regionDto = mapper.Map<RegionDto>(regionDomain);
 
             return Ok(regionDto);
         }
