@@ -18,7 +18,7 @@ namespace FirstWebAPI.Controllers
         private readonly IRegionRepository regionRepository;
         private readonly IMapper mapper;
 
-        public RegionsController(WalksDbContext context, IRegionRepository regionRepository,IMapper mapper)
+        public RegionsController(WalksDbContext context, IRegionRepository regionRepository, IMapper mapper)
         {
             this.context = context;
             this.regionRepository = regionRepository;
@@ -50,52 +50,69 @@ namespace FirstWebAPI.Controllers
                 return NotFound();
             }
 
-           var regionDto = mapper.Map<RegionDto>(regionsDomain);
-
-            return Ok(regionDto);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto){
-
-            // Map DTO to domain model
-            var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
-
-            // Use Domain model to create region 
-            regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
-
-            // Map domain model back to dto
-            var regionDto = mapper.Map<RegionDto>(regionDomainModel);
-
-            return CreatedAtAction(nameof(GetById), new {id = regionDto.Id}, regionDto );   
-        }
-
-        [HttpPut]
-        [Route("{id:Guid}")]
-        public async Task<IActionResult> Update([FromRoute] Guid id,[FromBody]  UpdateRegionRequestDto updateRegionRequestDto){
-
-            // Map DTO to domain model
-            var regionsDomain = mapper.Map<Region>(updateRegionRequestDto);
-            
-            regionsDomain = await regionRepository.UpdateAsync(id,regionsDomain);
-            if (regionsDomain == null)
-            {
-                return NotFound();
-            } 
-
-            // Convert Domain model to DTO
             var regionDto = mapper.Map<RegionDto>(regionsDomain);
 
             return Ok(regionDto);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
+        {
+
+            if (ModelState.IsValid)
+            {
+                // Map DTO to domain model
+                var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
+
+                // Use Domain model to create region 
+                regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
+
+                // Map domain model back to dto
+                var regionDto = mapper.Map<RegionDto>(regionDomainModel);
+
+                return CreatedAtAction(nameof(GetById), new { id = regionDto.Id }, regionDto);
+
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
+        {
+            if (ModelState.IsValid)
+            {
+                // Map DTO to domain model
+                var regionsDomain = mapper.Map<Region>(updateRegionRequestDto);
+
+                regionsDomain = await regionRepository.UpdateAsync(id, regionsDomain);
+                if (regionsDomain == null)
+                {
+                    return NotFound();
+                }
+
+                // Convert Domain model to DTO
+                var regionDto = mapper.Map<RegionDto>(regionsDomain);
+
+                return Ok(regionDto);
+            }
+            else{
+                return BadRequest(ModelState);
+            }
+        }
+
         [HttpDelete]
         [Route("{id:Guid}")]
-        public async Task<IActionResult> Delete([FromRoute] Guid id){
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
 
             var regionDomain = await regionRepository.DeleteAsync(id);
 
-            if(regionDomain == null){
+            if (regionDomain == null)
+            {
                 return NotFound();
             }
 
