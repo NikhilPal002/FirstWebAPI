@@ -1,4 +1,5 @@
 using AutoMapper;
+using FirstWebAPI.CustomAction;
 using FirstWebAPI.Data;
 using FirstWebAPI.Models.Domain;
 using FirstWebAPI.Models.DTO;
@@ -22,6 +23,7 @@ namespace FirstWebAPI.Controllers
         }
 
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddWalksRequestDto addWalksRequestDto ){
             
             // map dto to d omain model
@@ -60,6 +62,7 @@ namespace FirstWebAPI.Controllers
 
         [HttpPut]
         [Route("{id:Guid}")]
+        [ValidateModel]
         public async Task<IActionResult> Update([FromRoute] Guid id,UpdateWalkRequestDto updateWalkRequestDto){
 
             var walkDomain = mapper.Map<Walk>(updateWalkRequestDto);
